@@ -6,6 +6,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
+
     steps:
     - uses: actions/checkout@v4
 
@@ -33,13 +36,24 @@ jobs:
 
         pip install --upgrade pip cython buildozer
 
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v2
-      with:
-        api-level: 31
-        build-tools: 31.0.0
+    - name: Install Android SDK Command Line Tools
+      run: |
+        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+        cd $ANDROID_SDK_ROOT/cmdline-tools
+        curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip commandlinetools.zip
+        rm commandlinetools.zip
+        mv cmdline-tools latest
+
+    - name: Install SDK packages
+      run: |
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platform-tools" "platforms;android-31" "build-tools;31.0.0" "ndk;21.4.7075529"
 
     - name: Build APK
+      env:
+        ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+        PATH: ${{ env.ANDROID_SDK_ROOT }}/platform-tools:${PATH}
       run: buildozer android debug
 
     - name: Upload APK
