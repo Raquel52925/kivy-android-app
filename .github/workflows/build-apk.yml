@@ -25,7 +25,7 @@ jobs:
           unzip \
           openjdk-17-jdk \
           python3-pip \
-          libncurses5 \
+          libncurses-dev \
           libffi-dev \
           libssl-dev \
           libsqlite3-dev \
