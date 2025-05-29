@@ -5,85 +5,28 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v2
 
-    - uses: actions/setup-python@v5
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
         python-version: '3.9'
 
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential zip unzip openjdk-17-jdk python3-pip \
-          libncurses-dev libffi-dev libssl-dev libsqlite3-dev zlib1g-dev libjpeg-dev
-        pip install --upgrade pip
-        pip install cython buildozer
-
-    - name: Install Android SDK
-      run: |
-        export ANDROID_SDK_ROOT=$HOME/android-sdk
-        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-        cd $ANDROID_SDK_ROOT/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip commandlinetools-linux-9477386_latest.zip
-        rm commandlinetools-linux-9477386_latest.zip
-        
-        # The new structure has the tools in cmdline-tools/bin/
-        # Verify sdkmanager exists in the new location
-        if [ -f "bin/sdkmanager" ]; then
-          echo "sdkmanager found successfully"
-          chmod +x bin/sdkmanager
-        else
-          echo "Error: sdkmanager not found!"
-          ls -laR .
-          exit 1
-        fi
-
-        yes | bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
-        bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
-          "platform-tools" \
-          "platforms;android-31" \
-          "build-tools;31.0.0" \
-          "ndk;25.1.8937393"
-
-    - name: Set up Buildozer environment
-      run: |
-        # Create Buildozer's expected directory structure
-        mkdir -p $HOME/.buildozer/android/platform/android-sdk
-        
-        # Symlink components to where Buildozer expects them
-        mkdir -p $HOME/.buildozer/android/platform/android-sdk/tools/bin
-        ln -sfn $HOME/android-sdk/cmdline-tools/bin/sdkmanager $HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
-        ln -sfn $HOME/android-sdk/platform-tools $HOME/.buildozer/android/platform/android-sdk/platform-tools
-        ln -sfn $HOME/android-sdk/build-tools $HOME/.buildozer/android/platform/android-sdk/build-tools
-        
-        # Add to PATH
-        echo "$HOME/android-sdk/cmdline-tools/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
-
-    - name: Verify environment
-      run: |
-        echo "Checking sdkmanager..."
-        $HOME/android-sdk/cmdline-tools/bin/sdkmanager --list
-        echo "Java version:"
-        java -version
-        echo "Buildozer version:"
-        buildozer --version
+        sudo apt update
+        sudo apt install -y build-essential git zip unzip openjdk-17-jdk python3-pip
+        pip install cython
+        pip install buildozer
 
     - name: Build APK
       run: |
-        export ANDROID_SDK_ROOT=$HOME/android-sdk
-        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
-        
-        # Clean previous builds
-        buildozer android clean
-        # Build with verbose output
-        buildozer -v android debug
+        cd BookstoreApp
+        buildozer android debug
 
     - name: Upload APK
-      if: success()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v2
       with:
-        name: myapp-apk
-        path: bin/*.apk
+        name: bookstoreapp-apk
+        path: BookstoreApp/bin/*.apk
