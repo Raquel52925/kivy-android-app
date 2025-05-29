@@ -19,42 +19,32 @@ jobs:
       run: |
         sudo apt-get update
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
-          build-essential \
-          git \
-          zip \
-          unzip \
-          openjdk-17-jdk \
-          python3-pip \
-          libncurses-dev \
-          libffi-dev \
-          libssl-dev \
-          libsqlite3-dev \
-          zlib1g-dev \
-          libjpeg-dev
+          build-essential git zip unzip openjdk-17-jdk python3-pip \
+          libncurses-dev libffi-dev libssl-dev libsqlite3-dev zlib1g-dev libjpeg-dev
 
-        pip install --upgrade pip
-        pip install cython buildozer
+        pip install --upgrade pip cython buildozer
 
-    - name: Install Android SDK and tools
+    - name: Install Android SDK
       run: |
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
         cd $ANDROID_SDK_ROOT/cmdline-tools
-
         curl -O https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip -q commandlinetools-linux-9477386_latest.zip
         rm commandlinetools-linux-9477386_latest.zip
-
-        # Move tools to expected 'latest' location
         mv cmdline-tools latest
 
-        # Accept licenses and install packages
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
           "platform-tools" \
           "platforms;android-31" \
           "build-tools;31.0.0" \
           "ndk;21.4.7075529"
+
+    - name: Symlink SDK for Buildozer
+      run: |
+        mkdir -p $HOME/.buildozer/android/platform
+        ln -sfn $HOME/android-sdk $HOME/.buildozer/android/platform/android-sdk
 
     - name: Build APK
       run: |
