@@ -7,9 +7,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4  # Updated from v3 to v4
+    - uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v5  # Updated from v4 to v5
+    - uses: actions/setup-python@v5
       with:
         python-version: '3.9'
 
@@ -37,26 +37,29 @@ jobs:
           "build-tools;31.0.0" \
           "ndk;21.4.7075529"
 
-    - name: Link SDK for Buildozer
+    - name: Set up Buildozer environment
       run: |
-        BZR_SDK=$HOME/.buildozer/android/platform/android-sdk
-        LOCAL_SDK=$HOME/android-sdk
-
-        mkdir -p $BZR_SDK
-        ln -sfn $LOCAL_SDK $BZR_SDK
-        mkdir -p $BZR_SDK/tools/bin
-        ln -sfn $LOCAL_SDK/cmdline-tools/latest/bin/sdkmanager $BZR_SDK/tools/bin/sdkmanager
-        ln -sfn $LOCAL_SDK/platform-tools $BZR_SDK/platform-tools
-        ln -sfn $LOCAL_SDK/build-tools $BZR_SDK/build-tools
+        # Create the expected directory structure
+        mkdir -p $HOME/.buildozer/android/platform
+        # Symlink the entire SDK to the expected location
+        ln -sfn $HOME/android-sdk $HOME/.buildozer/android/platform/android-sdk
+        
+        # Add Android tools to PATH
+        echo "$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
 
     - name: Build APK
       run: |
         export ANDROID_SDK_ROOT=$HOME/android-sdk
-        export PATH=$ANDROID_SDK_ROOT/platform-tools:$PATH
-        buildozer android debug
+        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
+        
+        # Initialize buildozer
+        buildozer init
+        # Build the APK with debug output
+        buildozer -v android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v4  # Updated from v3 to v4
+      if: success()
+      uses: actions/upload-artifact@v4
       with:
         name: myapp-apk
         path: bin/*.apk
