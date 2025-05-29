@@ -3,47 +3,32 @@ name: Build APK
 on: [push]
 
 jobs:
-  test-upload:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-
-      - name: Upload README as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-artifact
-          path: README.md
-
   build:
     runs-on: ubuntu-latest
-    needs: test-upload
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
+    - name: Checkout repo
+      uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y build-essential git zip unzip openjdk-17-jdk python3-pip
-          pip install cython
-          pip install buildozer
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential git zip unzip openjdk-17-jdk python3-pip
+        pip install cython
+        pip install buildozer
 
-      - name: Build APK
-        run: |
-          cd BookstoreApp
-          buildozer android debug
+    - name: Build APK
+      run: |
+        cd BookstoreApp
+        buildozer android debug
 
-      - name: List APK files
-        run: ls -l BookstoreApp/bin/*.apk || echo "No APK files found"
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v2
-        with:
-          name: bookstoreapp-apk
-          path: BookstoreApp/bin/*.apk
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: bookstoreapp-apk
+        path: BookstoreApp/bin/*.apk
