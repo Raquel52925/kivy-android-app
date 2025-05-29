@@ -1,5 +1,4 @@
 name: Build APK
-
 on: [push]
 
 jobs:
@@ -12,8 +11,7 @@ jobs:
 
     - name: Set up Python
       uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+      with: python-version: '3.9'
 
     - name: Install dependencies
       run: |
@@ -21,10 +19,9 @@ jobs:
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
           build-essential git zip unzip openjdk-17-jdk python3-pip \
           libncurses-dev libffi-dev libssl-dev libsqlite3-dev zlib1g-dev libjpeg-dev
-
         pip install --upgrade pip cython buildozer
 
-    - name: Install Android SDK
+    - name: Install Android SDK and tools
       run: |
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
@@ -43,8 +40,15 @@ jobs:
 
     - name: Symlink SDK for Buildozer
       run: |
-        mkdir -p $HOME/.buildozer/android/platform
-        ln -sfn $HOME/android-sdk $HOME/.buildozer/android/platform/android-sdk
+        BZR_SDK=$HOME/.buildozer/android/platform/android-sdk
+        LOCAL_SDK=$HOME/android-sdk
+
+        mkdir -p $BZR_SDK
+        ln -sfn $LOCAL_SDK $BZR_SDK
+        mkdir -p $BZR_SDK/tools/bin
+        ln -sfn $LOCAL_SDK/cmdline-tools/latest/bin/sdkmanager $BZR_SDK/tools/bin/sdkmanager
+        ln -sfn $LOCAL_SDK/platform-tools $BZR_SDK/platform-tools
+        ln -sfn $LOCAL_SDK/build-tools $BZR_SDK/build-tools
 
     - name: Build APK
       run: |
