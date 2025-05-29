@@ -29,22 +29,24 @@ jobs:
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip commandlinetools-linux-9477386_latest.zip
         rm commandlinetools-linux-9477386_latest.zip
-        # Move contents to proper directory structure
+        
+        # The extracted files are in cmdline-tools directory
+        # Move them to cmdline-tools/latest/ as required by the new structure
         mkdir -p latest
-        mv bin lib NOTICE.txt source.properties latest/
+        mv * latest/ || true  # Ignore errors if directory is empty
         
         # Verify sdkmanager exists
-        if [ -f "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
+        if [ -f "latest/bin/sdkmanager" ]; then
           echo "sdkmanager found successfully"
-          chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager
+          chmod +x latest/bin/sdkmanager
         else
-          echo "sdkmanager not found!"
-          ls -laR $ANDROID_SDK_ROOT/cmdline-tools
+          echo "Error: sdkmanager not found!"
+          ls -laR .
           exit 1
         fi
 
-        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
+        yes | latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+        latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
           "platform-tools" \
           "platforms;android-31" \
           "build-tools;31.0.0" \
@@ -56,7 +58,7 @@ jobs:
         mkdir -p $HOME/.buildozer/android/platform/android-sdk
         
         # Symlink components
-        ln -sfn $HOME/android-sdk/cmdline-tools $HOME/.buildozer/android/platform/android-sdk/tools
+        ln -sfn $HOME/android-sdk/cmdline-tools/latest $HOME/.buildozer/android/platform/android-sdk/tools
         ln -sfn $HOME/android-sdk/platform-tools $HOME/.buildozer/android/platform/android-sdk/platform-tools
         ln -sfn $HOME/android-sdk/build-tools $HOME/.buildozer/android/platform/android-sdk/build-tools
         
