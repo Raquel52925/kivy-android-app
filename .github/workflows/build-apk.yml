@@ -24,37 +24,39 @@ jobs:
     - name: Install Android SDK
       run: |
         export ANDROID_SDK_ROOT=$HOME/android-sdk
-        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-        cd $ANDROID_SDK_ROOT/cmdline-tools
+        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/latest
+        cd $ANDROID_SDK_ROOT/cmdline-tools/latest
         curl -O https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip -q commandlinetools-linux-9477386_latest.zip
         rm commandlinetools-linux-9477386_latest.zip
-        mv cmdline-tools latest
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
           "platform-tools" \
           "platforms;android-31" \
           "build-tools;31.0.0" \
-          "ndk;21.4.7075529"
+          "ndk;25.1.8937393"
 
     - name: Set up Buildozer environment
       run: |
-        # Create the expected directory structure
-        mkdir -p $HOME/.buildozer/android/platform
-        # Symlink the entire SDK to the expected location
-        ln -sfn $HOME/android-sdk $HOME/.buildozer/android/platform/android-sdk
+        # Create Buildozer's expected directory structure
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk
+        # Symlink all components to where Buildozer expects them
+        ln -sfn $HOME/android-sdk/cmdline-tools $HOME/.buildozer/android/platform/android-sdk/tools
+        ln -sfn $HOME/android-sdk/platform-tools $HOME/.buildozer/android/platform/android-sdk/platform-tools
+        ln -sfn $HOME/android-sdk/build-tools $HOME/.buildozer/android/platform/android-sdk/build-tools
+        ln -sfn $HOME/android-sdk/platforms $HOME/.buildozer/android/platform/android-sdk/platforms
+        ln -sfn $HOME/android-sdk/ndk $HOME/.buildozer/android/platform/android-sdk/ndk
         
         # Add Android tools to PATH
         echo "$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
 
-    - name: Verify buildozer.spec
+    - name: Verify environment
       run: |
-        if [ -f buildozer.spec ]; then
-          echo "buildozer.spec exists, skipping init"
-          cat buildozer.spec
-        else
-          buildozer init
-        fi
+        echo "Checking sdkmanager..."
+        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --list
+        echo "Buildozer environment:"
+        buildozer --version
+        echo "PATH: $PATH"
 
     - name: Build APK
       run: |
