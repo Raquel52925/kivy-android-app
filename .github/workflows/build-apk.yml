@@ -15,7 +15,7 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Install system dependencies
+    - name: Install dependencies
       run: |
         sudo apt-get update
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -26,7 +26,6 @@ jobs:
           openjdk-17-jdk \
           python3-pip \
           libncurses-dev \
-          libncurses5-dev \
           libffi-dev \
           libssl-dev \
           libsqlite3-dev \
@@ -36,16 +35,20 @@ jobs:
         pip install --upgrade pip
         pip install cython buildozer
 
-    - name: Install Android SDK
+    - name: Install Android SDK and tools
       run: |
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
         cd $ANDROID_SDK_ROOT/cmdline-tools
+
         curl -O https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip commandlinetools-linux-9477386_latest.zip -d latest
+        unzip -q commandlinetools-linux-9477386_latest.zip
         rm commandlinetools-linux-9477386_latest.zip
 
-        # Accept licenses & install build-tools
+        # Move tools to expected 'latest' location
+        mv cmdline-tools latest
+
+        # Accept licenses and install packages
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
           "platform-tools" \
