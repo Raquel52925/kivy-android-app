@@ -30,17 +30,9 @@ jobs:
           libssl-dev \
           libsqlite3-dev \
           zlib1g-dev \
-          libjpeg-dev \
-          libandroid-tools
+          libjpeg-dev
 
         pip install --upgrade pip cython buildozer
-
-    - name: Initialize Buildozer (optional)
-      run: |
-        cd MyApp
-        if [ ! -f buildozer.spec ]; then
-          buildozer init
-        fi
 
     - name: Build APK
       run: |
@@ -48,7 +40,7 @@ jobs:
         buildozer android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: myapp-apk
         path: MyApp/bin/*.apk
