@@ -1,0 +1,32 @@
+name: Build APK
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential git zip unzip openjdk-17-jdk python3-pip
+        pip install cython
+        pip install buildozer
+
+    - name: Build APK
+      run: |
+        cd MyApp
+        buildozer android debug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v2
+      with:
+        name: myapp-apk
+        path: MyApp/bin/*.apk
