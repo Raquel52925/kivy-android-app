@@ -27,8 +27,11 @@ jobs:
         cd BookstoreApp
         buildozer android debug
 
+    - name: List APK files
+      run: ls -l BookstoreApp/bin/*.apk || echo "No APK files found"
+
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: bookstoreapp-apk
         path: BookstoreApp/bin/*.apk
