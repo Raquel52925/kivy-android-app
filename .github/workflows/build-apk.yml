@@ -5,20 +5,34 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: '3.9'
 
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y build-essential git zip unzip openjdk-17-jdk python3-pip
-        pip install cython
-        pip install buildozer
+        sudo apt install -y \
+          build-essential \
+          git \
+          zip \
+          unzip \
+          openjdk-17-jdk \
+          python3-pip \
+          libncurses5 \
+          libffi-dev \
+          libssl-dev \
+          libsqlite3-dev \
+          zlib1g-dev \
+          libjpeg-dev
+
+        pip install --upgrade pip cython buildozer
 
     - name: Build APK
       run: |
@@ -26,7 +40,7 @@ jobs:
         buildozer android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: myapp-apk
         path: MyApp/bin/*.apk
