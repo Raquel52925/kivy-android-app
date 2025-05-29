@@ -15,31 +15,32 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Run apt-get update
-      run: sudo apt-get update
-
-    - name: Install required packages
+    - name: Install dependencies
       run: |
+        sudo apt-get update
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
           build-essential \
           git \
           zip \
           unzip \
           openjdk-17-jdk \
-          python3-pip
+          python3-pip \
+          libncurses5 \
+          libffi-dev \
+          libssl-dev \
+          libsqlite3-dev \
+          zlib1g-dev \
+          libjpeg-dev
 
-    - name: Install Python packages
-      run: |
-        pip install --upgrade pip
-        pip install cython buildozer
+        pip install --upgrade pip cython buildozer
 
     - name: Build APK
       run: |
-        cd MyApp
+        cd kivy-android-app
         buildozer android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: myapp-apk
-        path: MyApp/bin/*.apk
+        path: kivy-android-app/bin/*.apk
