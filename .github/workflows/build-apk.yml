@@ -24,11 +24,10 @@ jobs:
 
     - name: Build APK
       run: |
-        cd BookstoreApp
         buildozer android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: bookstoreapp-apk
-        path: BookstoreApp/bin/*.apk
+        path: bin/*.apk
