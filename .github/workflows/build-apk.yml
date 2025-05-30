@@ -27,7 +27,7 @@ jobs:
         buildozer android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v2.3.1  # 👈 fix here!
       with:
         name: bookstoreapp-apk
         path: bin/*.apk
