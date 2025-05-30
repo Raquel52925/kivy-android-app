@@ -29,5 +29,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
-          name: bookstoreapp-apk
+          name: app-release
           path: bin/*.apk
