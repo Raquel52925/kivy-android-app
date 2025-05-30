@@ -19,7 +19,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y build-essential git zip unzip openjdk-17-jdk python3-pip
-        pip install cython
+        pip install --upgrade pip setuptools wheel cython
         pip install buildozer
 
     - name: Build APK
