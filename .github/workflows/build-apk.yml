@@ -1,33 +1,20 @@
-name: Build APK
-
-on: [push]
+name: Emergency APK
+on: [workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
-
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y build-essential git zip unzip openjdk-17-jdk python3-pip
-          pip install --upgrade pip setuptools wheel cython
-          pip install buildozer
+      - uses: actions/checkout@v4
 
       - name: Build APK
         run: |
+          sudo apt update
+          sudo apt install -y python3-pip openjdk-17-jdk
+          pip install buildozer
           buildozer android debug
+          ls -lh bin/  # Show where APK is
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-release
-          path: bin/*.apk
+      - name: Create Download Link
+        run: |
+          curl --upload-file bin/*.apk https://transfer.sh/your_app.apk
