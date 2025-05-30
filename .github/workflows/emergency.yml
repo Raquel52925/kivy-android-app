@@ -1,0 +1,32 @@
+name: Emergency APK Build
+
+on: 
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up emergency builder
+        run: |
+          # Save as build.sh
+          cat << 'EOF' > build.sh
+          #!/bin/bash
+          echo "Installing dependencies..."
+          sudo apt update -y
+          sudo apt install -y build-essential openjdk-17-jdk python3-pip
+          pip install buildozer
+
+          echo "Building APK..."
+          buildozer android debug
+
+          echo "Compressing results..."
+          tar -czvf apk_build.tar.gz bin/
+          EOF
+
+          chmod +x build.sh
+
+      - name: Run build script
+        run
